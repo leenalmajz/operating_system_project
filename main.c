@@ -10,11 +10,15 @@
 
 #define MAX_PROCESSES 128
 #define MAX_ARGS 128
-pid_t background_processes[MAX_PROCESSES]; // Array to track background PIDs
+
+// array to track background PIDs
+pid_t background_processes[MAX_PROCESSES]; 
 int bg_process_count = 0;
 
+// external function for handling redirection in exec and globalusage
 extern int handle_redirect(char *cmd, char *filename, int background);
 
+// check and clean up finished background processes
 void check_background_processes() {
     for (int i = 0; i < bg_process_count; i++) {
         if (background_processes[i] != -1) {
@@ -38,6 +42,7 @@ void check_background_processes() {
     bg_process_count = new_count;
 }
 
+// handle execution of commands
 int handle_exec(char *cmd) {
     cmd += 5; // Ignore "exec "
     char *args[MAX_ARGS];
@@ -110,9 +115,11 @@ int handle_exec(char *cmd) {
     return 0;
 }
 
+// handle global usage command
 int handle_globalusage(char *cmd) {
     char *output_file = NULL;
 
+    // Handle output redirection
     char *redirect = strchr(cmd, '>');
     if (redirect) {
         *redirect = '\0';
@@ -138,6 +145,7 @@ int handle_globalusage(char *cmd) {
     }
 }
 
+// Handle command redirection
 int handle_redirect(char *cmd, char *filename, int background) {
     int fd = open(filename, O_WRONLY | O_APPEND | O_CREAT, 0644);
     if (fd < 0) {
@@ -186,6 +194,7 @@ int handle_redirect(char *cmd, char *filename, int background) {
     return 0;
 }
 
+// Handle quit command
 int handle_quit() {
     // Check for running background processes
     if (bg_process_count > 0) {
