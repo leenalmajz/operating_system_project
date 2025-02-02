@@ -19,4 +19,4 @@ run: $(TARGET)
 
 # Rule to clean up the build files
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) *.txt

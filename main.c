@@ -103,6 +103,7 @@ int handle_exec(char *cmd) {
     } else { // Parent process
         if (!background) {
             waitpid(pid, NULL, 0); // Wait for child to finish
+            printf("Process with PID %d finished.\n", pid);
         } else {
             if (bg_process_count < MAX_PROCESSES) {
                 background_processes[bg_process_count++] = pid; // Add PID to the array
@@ -155,7 +156,11 @@ int handle_redirect(char *cmd, char *filename, int background) {
 
     if (strcmp(cmd, "globalusage") == 0) {
         char *buffer = "IMCSH Version 1.1 created by Leen Al Majzoub and Botond Hernyes\n";
-        write(fd, buffer, strlen(buffer));
+        if (write(fd, buffer, strlen(buffer)) < 0) {
+            perror("Error writing to file");
+            close(fd);
+            return 1;
+        }
         close(fd);
         return 0;
     }
@@ -201,6 +206,8 @@ int handle_quit() {
         printf("The following processes are running, are you sure you want to quit? [Y/n]\n");
         for (int i = 0; i < bg_process_count; i++) {
             if (background_processes[i] != -1) { // Prints out all of the running processes 🏃‍➡️
+                kill(background_processes[i], SIGTERM);
+                printf("Terminated process with PID: %d\n", background_processes[i]);
                 printf("PID: %d\n", background_processes[i]);
             }
         }
